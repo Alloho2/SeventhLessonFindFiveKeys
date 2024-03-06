@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,8 +23,9 @@ public class MainActivity extends AppCompatActivity {
     private float x; // координата касания по оси X
     private float y; // координата касания по оси Y
     private int[] coordinatesKeys; // массив координат 5 ключей
-    private int interval = 50; // погрешность поиска
+    private int interval = 40; // погрешность поиска
     Key[] keys = new Key[5]; //Массив из объектов Key
+    private FrameLayout mainLayout;
 
 
 
@@ -29,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mainLayout=findViewById(R.id.mainLayout);
 
         // привязка разметки к полям
         screen = findViewById(R.id.screen);
@@ -55,15 +60,16 @@ public class MainActivity extends AppCompatActivity {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN: // нажатие
                     coordinates.setText("Нажатие " + x + ", " + y);
+                    //проверка что ключи создались, вывод в консоль
                     Arrays.stream(keys).forEach(key -> System.out.println(key.getName()+key.getX()+key.getY()));
                     break;
                 case MotionEvent.ACTION_MOVE: // движение
                     coordinates.setText("Движение " + x + ", " + y);
-
                     for (Key key:keys) {
                         if (x >= (key.getX() - interval) && x <= (key.getX() + interval) &&
                                 y >= (key.getY() - interval) && y <= (key.getY() + interval)) {
                             Toast.makeText(MainActivity.this, "Найден " + (Integer.parseInt(key.getName()) + 1) + " ключ", Toast.LENGTH_SHORT).show();
+                            addKeyIcon(key.getX(), key.getY());
                         }
                     }
                     break;
@@ -76,4 +82,16 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     };
+
+   //метод добавление иконки
+    private void addKeyIcon(float x, float y) {
+        ImageView keyIcon = new ImageView(this);
+        keyIcon.setImageResource(R.drawable.key_icon);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = (int) x;
+        params.topMargin = (int) y;
+        mainLayout.addView(keyIcon, params);
+    }
 }
